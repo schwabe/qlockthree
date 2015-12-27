@@ -231,7 +231,6 @@
 #include "IRTranslatorSparkfun.h"
 #include "IRTranslatorMooncandles.h"
 #include "IRTranslatorLunartec.h"
-#include "MyIRremote.h"
 #include "MyRTC.h"
 #include "MyDCF77.h"
 #include "Button.h"
@@ -683,15 +682,26 @@ void updateFromRtc() {
     }
 }
 
+#ifdef __arm__
+// unistd.h inkludieren definiert auch alarm, was Problem mit Alarm Klasse macht.*/
+extern "C" char* sbrk(int incr);
+#endif
+
 /**
  * Den freien Specher abschaetzen.
  * Kopiert von: http://playground.arduino.cc/Code/AvailableMemory
  */
 int freeRam() {
+#ifdef __arm__
+    char top;
+	return &top - reinterpret_cast<char*>(sbrk(0));
+#else
     extern int __heap_start, *__brkval;
     int v;
     return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+#endif
 }
+
 
 /**
  * Initialisierung. setup() wird einmal zu Beginn aufgerufen, wenn der

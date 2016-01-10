@@ -47,12 +47,13 @@ public:
 private:
     int _address;
     byte _statusLedPin;
-
-    byte _seconds;
-
     byte decToBcd(byte val);
     byte bcdToDec(byte val);
     uint8_t conv2d(const char* p);
+
+protected:
+    byte _seconds;
+
 };
 
 #endif

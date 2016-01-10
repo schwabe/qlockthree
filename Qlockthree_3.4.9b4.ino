@@ -232,6 +232,7 @@
 #include "IRTranslatorMooncandles.h"
 #include "IRTranslatorLunartec.h"
 #include "MyRTC.h"
+#include "TeensyRTC.h"
 #include "MyDCF77.h"
 #include "Button.h"
 #include "AnalogButton.h"
@@ -485,7 +486,12 @@ IRTranslatorLunartec irTranslator;
 /**
  * Die Real-Time-Clock mit der Status-LED fuer das SQW-Signal.
  */
+#ifdef TEENSYRTC
+TeensyRTC rtc(PIN_SQW_LED);
+#else
 MyRTC rtc(0x68, PIN_SQW_LED);
+#endif
+
 volatile byte helperSeconds;
 
 /**
@@ -773,6 +779,8 @@ void setup() {
 #elif defined DS3231
     Serial.println(F("Uhrentyp ist DS3231."));
     rtc.enableSQWOnDS3231();
+#elif defined TEENSYRTC
+    Serial.println(F("Uhrentyp ist Teensy RTC (Freescale MK20)"));
 #else
     Definition_des_Uhrtyps_fehlt!
     In der Configuration.h muss der Uhrentyp angegeben werden!

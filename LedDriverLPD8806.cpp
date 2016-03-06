@@ -18,6 +18,8 @@
  * Achtung! LPD8806-Streifen koennen nur in Vielfachen von 2 getrennt werden! Daher bleiben am Rand LEDs uebrig (und dunkel)!
  *
  */
+#include <SPI.h>
+
 #include "LedDriverLPD8806.h"
 #include "Configuration.h"
 
@@ -33,12 +35,20 @@
  * @param data Pin, an dem die Data-Line haengt.
  */
 LedDriverLPD8806::LedDriverLPD8806(byte dataPin, byte clockPin) {
-    _dataPin = dataPin;
-    _clockPin = clockPin;
-    _strip = new LPD8806(NUM_PIXEL, _dataPin, _clockPin);
-    _strip->begin();
-    setColor(250, 255, 200);
+  if (dataPin == -1){
+    // Use HW SPI
+    if (clockPin == 14)
+      SPI.setSCK(14);
+    _strip = new LPD8806(NUM_PIXEL);
+
+  } else
+    _strip = new LPD8806(NUM_PIXEL, dataPin, clockPin);
+
+  _strip->begin();
+  setColor(250, 255, 200);
 }
+
+
 
 /**
  * init() wird im Hauptprogramm in init() aufgerufen.

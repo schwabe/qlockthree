@@ -17,6 +17,7 @@
  * LG added by Darryl Smith (based on the JVC protocol)
  */
 
+#ifndef __arm__
 #include "MyIRremote.h"
 #include "MyIRremoteInt.h"
 
@@ -1154,3 +1155,4 @@ void IRsend::sendDISH(unsigned long data, int nbits) {
     data <<= 1;
   }
 }
+#endif

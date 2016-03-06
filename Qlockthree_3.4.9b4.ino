@@ -248,7 +248,8 @@
     #include "Ereignisse.h"
 #endif
 
-#define FIRMWARE_VERSION "V 3.4.9b4 vom 17.04.2016"
+#define FIRMWARE_VERSION "V 3.4.9b4teensy vom 23.04.2016"
+#include "Time.h"
 
 /*
  * Den DEBUG-Schalter gibt es in allen Bibiliotheken. Wird er eingeschaltet, werden ueber den
@@ -442,7 +443,14 @@ LedDriverDotStar ledDriver(6, 7);
  * Clock: 7
  */
 #ifdef LED_DRIVER_LPD8806
+#if defined(__MK20DX256__)
+/* Auf dem Teensy 3.x nutzen wir die Hardware SPI PINs
+ * hängt, allerdings 14 statt 13 für clock um noch die LED sinnvoll nutzen
+ * zu können */
+LedDriverLPD8806 ledDriver(-1, 14);
+#else
 LedDriverLPD8806 ledDriver(6, 7);
+#endif
 
 #define PIN_MODE 11
 #define PIN_M_PLUS 13

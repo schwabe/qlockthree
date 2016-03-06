@@ -59,7 +59,6 @@ private:
 
     byte _brightnessScaleColor(byte colorPart);
 
-    byte _dataPin, _clockPin;
     LPD8806 *_strip;
 };
 

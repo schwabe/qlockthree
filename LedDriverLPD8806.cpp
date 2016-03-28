@@ -46,8 +46,17 @@ LedDriverLPD8806::LedDriverLPD8806(byte dataPin, byte clockPin) {
 
   _strip->begin();
   setColor(250, 255, 200);
+  test();
 }
 
+void LedDriverLPD8806::test()
+{
+    for (int i=0; i < _strip->numPixels(); i++) {
+        _strip->setPixelColor(i, _strip->Color(100,0,0));
+        _strip->show();
+        delay(5);
+  }
+}
 
 
 /**
@@ -65,6 +74,119 @@ void LedDriverLPD8806::printSignature() {
     Serial.println(F("LPD8806"));
 }
 
+#ifdef LPD_ALT_LAYOUT
+/**
+ * Den Bildschirm-Puffer auf die LED-Matrix schreiben.
+ *
+ * @param onChange: TRUE, wenn es Aenderungen in dem Bildschirm-Puffer gab,
+ *                  FALSE, wenn es ein Refresh-Aufruf war.
+ */
+void LedDriverLPD8806::writeScreenBufferToMatrix(word matrix[16], boolean onChange) {
+    if (onChange || _dirty) {
+        _dirty = false;
+        _clear();
+
+        uint32_t color = _strip->Color(_brightnessScaleColor(getRed()), _brightnessScaleColor(getBlue()), _brightnessScaleColor(getGreen()));
+
+        // wir muessen die Eck-LEDs umsetzten...
+        if ((matrix[1] & 0b0000000000011111) == 0b0000000000011111) {
+            _setEcke(0, color); // 1
+        }
+        if ((matrix[0] & 0b0000000000011111) == 0b0000000000011111) {
+            _setEcke(1, color); // 2
+        }
+        if ((matrix[3] & 0b0000000000011111) == 0b0000000000011111) {
+            _setEcke(2, color); // 3
+        }
+        if ((matrix[2] & 0b0000000000011111) == 0b0000000000011111) {
+            _setEcke(3, color); // 4
+        }
+
+
+        for (int y = 0; y < 10; y++) {
+            for (int x = 5; x < 16; x++) {
+                word t = 1 << x;
+                if ((matrix[y] & t) == t) {
+                    _setPixel(15 - x, 9 - y, color);
+                }
+            }
+        }
+
+
+        _strip->show();
+    }
+}
+
+/**
+ * Einen X/Y-koordinierten Pixel in der Matrix setzen.
+ */
+void LedDriverLPD8806::_setEcke(uint8_t ecke, uint32_t c) {
+    switch(ecke) {
+    case 0:
+        _strip->setPixelColor(1, c);
+        break;
+    case 1:
+        // led unten links + zeile + 1. led
+        _strip->setPixelColor(2 + 12  + 1 , c);
+        break;
+    case 2:
+        // 2 * leds + 9 zeilen + 1. led
+        _strip->setPixelColor(2*2 + 9 *12 + 1, c);
+        break;
+    case 3:
+        // 10 zeilen + 3 * leds
+        _strip->setPixelColor(10 *12 + (3 * 2) + 1, c);
+        break;
+    }
+}
+
+
+/**
+ * Einen X/Y-koordinierten Pixel in der Matrix setzen.
+ */
+void LedDriverLPD8806::_setPixel(byte x, byte y, uint32_t c) {
+    if (y % 2==1) {
+        // Gegenläufige Reiche
+        x = 10 -x;
+    } else {
+        // Ganz links freilassen
+        x = x +1;
+    }
+    if (y == 0) {
+        _strip->setPixelColor(2+x, c);
+    } else if (y <=8) {
+        _strip->setPixelColor(y*12 +4 + x, c);
+    } else {
+        // oberste reihe
+        _strip->setPixelColor(y*12 +6 + x, c);
+    }
+}
+
+void LedDriverLPD8806::_setPixel(byte num, uint32_t c) {
+    if (num < 110) {
+        if ((num / 11) % 2 == 0) {
+           ;
+        } else {
+            _strip->setPixelColor(((num / 11) * 12) + 11 - (num % 11), c);
+        }
+    } else {
+        switch (num) {
+            case 110:
+                _strip->setPixelColor(111 + 11, c);
+                break;
+            case 111:
+                _strip->setPixelColor(112 + 12, c);
+                break;
+            case 112:
+                _strip->setPixelColor(113 + 13, c);
+                break;
+            case 113:
+                _strip->setPixelColor(110 + 10, c);
+                break;
+        }
+    }
+}
+#else
 /**
  * Den Bildschirm-Puffer auf die LED-Matrix schreiben.
  *
@@ -104,6 +226,42 @@ void LedDriverLPD8806::writeScreenBufferToMatrix(word matrix[16], boolean onChan
         _strip->show();
     }
 }
+
+/**
+ * Einen X/Y-koordinierten Pixel in der Matrix setzen.
+ */
+void LedDriverLPD8806::_setPixel(byte x, byte y, uint32_t c) {
+    _setPixel(x + (y * 11), c);
+}
+
+/**
+ * Einen Pixel im Streifen setzten (die Eck-LEDs sind am Ende).
+ */
+void LedDriverLPD8806::_setPixel(byte num, uint32_t c) {
+    if (num < 110) {
+        if ((num / 11) % 2 == 0) {
+            _strip->setPixelColor(num + (num / 11), c);
+        } else {
+            _strip->setPixelColor(((num / 11) * 12) + 11 - (num % 11), c);
+        }
+    } else {
+        switch (num) {
+            case 110:
+                _strip->setPixelColor(111 + 11, c);
+                break;
+            case 111:
+                _strip->setPixelColor(112 + 12, c);
+                break;
+            case 112:
+                _strip->setPixelColor(113 + 13, c);
+                break;
+            case 113:
+                _strip->setPixelColor(110 + 10, c);
+                break;
+        }
+    }
+}
+#endif
 
 /**
  * Die Helligkeit des Displays anpassen.
@@ -153,41 +311,6 @@ void LedDriverLPD8806::wakeUp() {
 void LedDriverLPD8806::clearData() {
     _clear();
     _strip->show();
-}
-
-/**
- * Einen X/Y-koordinierten Pixel in der Matrix setzen.
- */
-void LedDriverLPD8806::_setPixel(byte x, byte y, uint32_t c) {
-    _setPixel(x + (y * 11), c);
-}
-
-/**
- * Einen Pixel im Streifen setzten (die Eck-LEDs sind am Ende).
- */
-void LedDriverLPD8806::_setPixel(byte num, uint32_t c) {
-    if (num < 110) {
-        if ((num / 11) % 2 == 0) {
-            _strip->setPixelColor(num + (num / 11), c);
-        } else {
-            _strip->setPixelColor(((num / 11) * 12) + 11 - (num % 11), c);
-        }
-    } else {
-        switch (num) {
-            case 110:
-                _strip->setPixelColor(111 + 11, c);
-                break;
-            case 111:
-                _strip->setPixelColor(112 + 12, c);
-                break;
-            case 112:
-                _strip->setPixelColor(113 + 13, c);
-                break;
-            case 113:
-                _strip->setPixelColor(110 + 10, c);
-                break;
-        }
-    }
 }
 
 /**

@@ -89,6 +89,8 @@
 // #define LED_DRIVER_DOTSTAR
 #define LED_DRIVER_LPD8806
 
+#define LPD_ALT_LAYOUT
+
 /*
  * Welche Uhr soll benutzt werden?
  */

@@ -447,20 +447,24 @@ LedDriverDotStar ledDriver(6, 7);
 /* Auf dem Teensy 3.x nutzen wir die Hardware SPI PINs
  * hängt, allerdings 14 statt 13 für clock um noch die LED sinnvoll nutzen
  * zu können */
-LedDriverLPD8806 ledDriver(-1, 14);
-#else
+//LedDriverLPD8806 ledDriver(-1, 14);
 LedDriverLPD8806 ledDriver(6, 7);
-#endif
-
+#define PIN_MODE 23
+#define PIN_M_PLUS 22
+#define PIN_H_PLUS 21
+#else
 #define PIN_MODE 11
 #define PIN_M_PLUS 13
 #define PIN_H_PLUS 12
+LedDriverLPD8806 ledDriver(6, 7);
+#endif
+
 
 #define BUTTONS_PRESSING_AGAINST LOW
 
 #define PIN_IR_RECEIVER A1
 
-#define PIN_LDR A0
+#define PIN_LDR A5
 #define IS_INVERTED false
 
 #define PIN_SQW_SIGNAL 2
@@ -468,7 +472,7 @@ LedDriverLPD8806 ledDriver(6, 7);
 
 #define PIN_DCF77_PON 4
 
-#define PIN_SQW_LED 9
+#define PIN_SQW_LED -1
 #define PIN_DCF77_LED 10
 
 #define PIN_SPEAKER -1

@@ -42,6 +42,7 @@ public:
 
     void shutDown();
     void wakeUp();
+    void test();
 
     void clearData();
 
@@ -51,7 +52,12 @@ private:
     boolean _dirty;
 
     void _setPixel(byte x, byte y, uint32_t c);
+
+    void _setEcke(uint8_t ecke, uint32_t c);
+
+#ifndef LPD_ALT_LAYOUT
     void _setPixel(byte num, uint32_t c);
+#endif
 
     uint32_t _wheel(byte wheelPos);
 

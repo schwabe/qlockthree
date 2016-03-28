@@ -49,8 +49,8 @@ public:
     boolean getDcfSignalIsInverted();
     void setDcfSignalIsInverted(boolean dcfSignalIsInverted);
 
-    char getTimeShift();
-    void setTimeShift(char timeShift);
+    signed char getTimeShift();
+    void setTimeShift(signed char timeShift);
 
     byte getJumpToTime();
     void setJumpToTime(byte jumpToTime);
@@ -67,7 +67,8 @@ private:
     byte _brightness;
     boolean _enableAlarm;
     boolean _dcfSignalIsInverted;
-    char _timeShift;
+
+    signed char _timeShift;
     byte _jumpToTime;
     TimeStamp* _NightTimes[4];
 

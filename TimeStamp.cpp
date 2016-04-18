@@ -6,9 +6,9 @@
  *
  * @mc       Arduino/RBBB
  * @autor    Christian Aschoff / caschoff _AT_ mac _DOT_ com
- * @version  1.7
+ * @version  1.7b
  * @created  2.3.2011
- * @updated  16.2.2015
+ * @updated  17.04.2016 (ergänzt durch A. Mueller)
  *
  * Versionshistorie:
  * V 1.1:  - Fehler in toString() behoben.
@@ -18,6 +18,8 @@
  * V 1.5:  - Optimierung hinsichtlich Speicherbedarf.
  * V 1.6:  - Verbessertes Debugging & leeren Konstruktor entfernt.
  * V 1.7:  - Unterstuetzung fuer die alte Arduino-IDE (bis 1.0.6) entfernt.
+ * V 1.7a: - Funktion getMinutesOfCentury() hinzugefügt
+ * V 1.7b: - Function getMinutesOfWeek() hinzugefügt
  */
 #include "TimeStamp.h"
 
@@ -28,20 +30,8 @@ TimeStamp::TimeStamp(byte minutes, byte hours, byte date, byte dayOfWeek, byte m
     set(minutes, hours, date, dayOfWeek, month, year);
 }
 
-TimeStamp::TimeStamp(MyDCF77 dcf77) {
-    setFrom(dcf77);
-}
-
-TimeStamp::TimeStamp(MyRTC rtc) {
-    setFrom(rtc);
-}
-
 byte TimeStamp::getMinutes() {
     return _minutes;
-}
-
-unsigned int TimeStamp::getMinutesOfDay() {
-    return _minutes + 60 * _hours;
 }
 
 /**
@@ -56,6 +46,55 @@ unsigned int TimeStamp::getMinutesOf12HoursDay(int minutesDiff) {
     }
 
     return ret;
+}
+
+unsigned int TimeStamp::getMinutesOfDay() {
+    return _minutes + 60 * _hours;
+}
+
+unsigned int TimeStamp::getMinutesOfWeek_07() {
+    return getMinutesOfDay() + 24 * 60 * _dayOfWeek;
+}
+
+unsigned int TimeStamp::getMinutesOfWeek() {
+    return getMinutesOfWeek_07() - 24 * 60;
+}
+
+unsigned long TimeStamp::getMinutesOfCentury() {
+    /* Funktion gibt NICHT die Minuten des aktuellen Jahrhunderts aus,
+     * sondern ermöglicht nur eine eindeutige Zuordnung. Das ist für
+     * die DCF-Auswertung nötig.
+     * Die Funktion reicht nicht aus, um Zeitvergleiche über eine 
+     * Tagesgrenze hinaus durchzuführen (außer DCF-Auswertung).
+     */
+//    return ( ((( _year * 12 + _month ) * 31 + _date) * 24 + _hours) * 60 + _minutes );
+
+    /* Exakte Berechnung der Minuten des aktuellen Jahrhunderts.
+     * Diese Funktion braucht mehr Speicher, ist dafür aber auch für 
+     * Zeitvergleiche über einen Tag hinaus geeignet, z.B. für den Countdown.
+     * Alternativ kann auch die obige Funktion für den Countdown verwendet werden,
+     * dann muss aber die Prüfung während eines Countdowns entfallen.
+     */
+    unsigned long retVal = 0;
+    if (_year) retVal += ( (_year + 3) / 4 + _year * 365);
+    switch (_month) {
+        case 12: retVal += 30;
+        case 11: retVal += 31;
+        case 10: retVal += 30;
+        case 9: retVal += 31;
+        case 8: retVal += 31;
+        case 7: retVal += 30;
+        case 6: retVal += 31;
+        case 5: retVal += 30;
+        case 4: retVal += 31;
+        case 3: retVal += 28;
+                if (_year / 4) {
+                    retVal++;
+                }
+        case 2: retVal += 31;
+    }
+    retVal = ((retVal + _date - 1) * 24 + _hours) * 60 + _minutes;
+    return retVal;
 }
 
 byte TimeStamp::getHours() {
@@ -78,22 +117,28 @@ byte TimeStamp::getYear() {
     return _year;
 }
 
-void TimeStamp::setFrom(MyDCF77 dcf77) {
-    _minutes = dcf77.getMinutes();
-    _hours = dcf77.getHours();
-    _date = dcf77.getDate();
-    _dayOfWeek = dcf77.getDayOfWeek();
-    _month = dcf77.getMonth();
-    _year = dcf77.getYear();
+void TimeStamp::setMinutes(byte minutes) {
+    _minutes = minutes;
 }
 
-void TimeStamp::setFrom(MyRTC rtc) {
-    _minutes = rtc.getMinutes();
-    _hours = rtc.getHours();
-    _date = rtc.getDate();
-    _dayOfWeek = rtc.getDayOfWeek();
-    _month = rtc.getMonth();
-    _year = rtc.getYear();
+void TimeStamp::setHours(byte hours) {
+    _hours = hours;
+}
+
+void TimeStamp::setDayOfWeek(byte dayOfWeek) {
+    _dayOfWeek = dayOfWeek;
+}
+
+void TimeStamp::setDate(byte date) {
+    _date = date;
+}
+
+void TimeStamp::setMonth(byte month) {
+    _month = month;
+}
+
+void TimeStamp::setYear(byte year) {
+    _year = year;
 }
 
 void TimeStamp::set(byte minutes, byte hours, byte date, byte dayOfWeek, byte month, byte year) {
@@ -103,6 +148,15 @@ void TimeStamp::set(byte minutes, byte hours, byte date, byte dayOfWeek, byte mo
     _dayOfWeek = dayOfWeek;
     _month = month;
     _year = year;
+}
+
+void TimeStamp::set(TimeStamp* timeStamp) {
+    _minutes = timeStamp->_minutes;
+    _hours = timeStamp->_hours;
+    _date = timeStamp->_date;
+    _dayOfWeek = timeStamp->_dayOfWeek;
+    _month = timeStamp->_month;
+    _year = timeStamp->_year;
 }
 
 /**

@@ -5,9 +5,9 @@
  *
  * @mc       Arduino/RBBB
  * @autor    Christian Aschoff / caschoff _AT_ mac _DOT_ com
- * @version  1.3
+ * @version  1.3c
  * @created  23.1.2013
- * @updated  16.2.2015
+ * @updated  17.04.2016 (Ergänzungen von A. Mueller)
  *
  * Versionshistorie:
  * V 1.0:  - Erstellt.
@@ -17,13 +17,16 @@
  *         - DcfSignalIsInverted aufgenommen.
  *         - TimeShift aufgenommen.
  * V 1.3:  - Unterstuetzung fuer die alte Arduino-IDE (bis 1.0.6) entfernt.
+ * V 1.3a: - Einstellung für automatischen Rücksprung und Nachtschaltung aufgenommen.
+ * V 1.3b: - Einstellung der Nachtschaltung um Sonderzeiten am Wochenende erweitert.
+ * V 1.3c: - Codeoptimierung bei den Einstellungen zur Nachtschaltung
  */
 #include "Settings.h"
 #include <EEPROM.h>
 #include "Renderer.h"
 
 #define SETTINGS_MAGIC_NUMBER 0xCA
-#define SETTINGS_VERSION 4
+#define SETTINGS_VERSION 6
 
 /**
  *  Konstruktor.
@@ -36,6 +39,20 @@ Settings::Settings() {
     _enableAlarm = false;
     _dcfSignalIsInverted = false;
     _timeShift = 0;
+    _jumpToTime = 10;
+    byte offTimeMoFrHours = 3;
+    byte offTimeMoFrMinutes = 0;
+    byte onTimeMoFrHours = 4;
+    byte onTimeMoFrMinutes = 30;
+    byte offTimeSaSoHours = 3;
+    byte offTimeSaSoMinutes = 0;
+    byte onTimeSaSoHours = 4;
+    byte onTimeSaSoMinutes = 30;
+    
+    _NightTimes[0] = new TimeStamp(offTimeMoFrMinutes, offTimeMoFrHours, 0, 0, 0, 0);
+    _NightTimes[1] = new TimeStamp(onTimeMoFrMinutes, onTimeMoFrHours, 0, 0, 0, 0);
+    _NightTimes[2] = new TimeStamp(offTimeSaSoMinutes, offTimeSaSoHours, 0, 0, 0, 0);
+    _NightTimes[3] = new TimeStamp(onTimeSaSoMinutes, onTimeSaSoHours, 0, 0, 0, 0);
 
     // Versuche alte Einstellungen zu laden...
     loadFromEEPROM();
@@ -119,6 +136,30 @@ void Settings::setTimeShift(char timeShift) {
 }
 
 /**
+ * Automatische Umschaltung zurück auf Uhrzeit
+ */
+byte Settings::getJumpToTime() {
+    return _jumpToTime;
+}
+
+void Settings::setJumpToTime(byte jumpToTime) {
+    _jumpToTime = jumpToTime;
+}
+
+/**
+ * Pointer auf onTime oder offTime
+ */
+TimeStamp* Settings::getNightTimeStamp(byte _position) {
+    /* 
+     * 0: offTimeMoFr
+     * 1: onTimeMoFr
+     * 2: offTimeSaSo
+     * 3: onTimeSaSo
+     */
+     return _NightTimes[_position];
+}
+
+/**
  * Die Einstellungen laden.
  */
 void Settings::loadFromEEPROM() {
@@ -131,6 +172,8 @@ void Settings::loadFromEEPROM() {
         _enableAlarm = EEPROM.read(6);
         _dcfSignalIsInverted = EEPROM.read(7);
         _timeShift = EEPROM.read(8);
+        _jumpToTime = EEPROM.read(9);
+        _loadSaveNightTimes(false);
     }
 }
 
@@ -164,5 +207,39 @@ void Settings::saveToEEPROM() {
     }
     if (EEPROM.read(8) != _timeShift) {
         EEPROM.write(8, _timeShift);
+    }
+    if (EEPROM.read(9) != _jumpToTime) {
+        EEPROM.write(9, _jumpToTime);
+    }
+    _loadSaveNightTimes(true);
+}
+
+void Settings::_loadSaveNightTimes(boolean save) {
+    byte forStart = 10;
+    byte forEnd = 17;
+    byte getValue;
+    for (byte i = forStart; i <= forEnd; i++) {
+        byte value = EEPROM.read(i);
+        byte i_forStart   = i - forStart;
+        byte i_forStart_2 = i_forStart / 2;
+        if (!(i_forStart % 2)) {
+            // Hours
+            if (save) {
+                getValue = _NightTimes[i_forStart_2]->getHours();
+            } else {
+                _NightTimes[i_forStart_2]->setHours(value);
+            }
+        } else {
+            // Minutes
+            if (save) {
+                getValue = _NightTimes[i_forStart_2]->getMinutes();
+            } else {
+                _NightTimes[i_forStart_2]->setMinutes(value);
+            }
+            
+        }
+        if (save && value != getValue) {
+            EEPROM.write(i, getValue);
+        }
     }
 }

@@ -4,9 +4,9 @@
  *
  * @mc       Arduino/RBBB
  * @autor    Christian Aschoff / caschoff _AT_ mac _DOT_ com
- * @version  1.5
+ * @version  1.5c
  * @created  23.1.2013
- * @updated  16.2.2015
+ * @updated  14.04.2016 (Ergänzungen von A. Mueller)
  *
  * Versionshistorie:
  * V 1.0:  - Erstellt
@@ -18,9 +18,41 @@
  *         - PWM_DURATION an neue LDR-Klasse angepasst.
  *         - DCF77_SIGNAL_IS_INVERTED jetzt im EEPROM.
  * V 1.5:  - Diverse Config-Moeglichkeiten fuer die verschiedenen LED-Driver eingefuehrt.
+ * V 1.5a: - Optionen für die neue DCF77-Synchronisation hinzugefuegt.
+ * V 1.5b: - Schalter für Zusatzoptionen von Qlockthree.ino hierher verlegt
+ * V 1.5c: - Schalter für Timer2 entfernt, da kein Timer mehr für die Driftkorrektur benötigt wird
  */
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
+
+/*
+ * Zusätzliche Schalter, um neue Zusatzfunktionen ein- bzw. auszuschalten.
+ */
+// Zeigt bei besonderem Ereignis Symbol in der Datumsanzeige (Standard: eingeschaltet).
+#define EVENTDAY
+
+// Zeigt einen Countdown (und am Ende ein blinkendes Symbol) zu einem Ereignis an (Standard: eingeschaltet).
+// #define EVENTDAY wird benötigt
+#define COUNTDOWN
+
+// Wenn ein Countdown zu einem Ereignis definiert wurde, automatisch (von der Uhrzeit) auf die Countdown-Ansicht springen. (Standard: eingeschaltet).
+#define AUTO_JUMP_TO_COUNTDOWN
+
+// Automatischer Rücksprung von STD_MODE_SECONDS, STD_MODE_DATE und STD_MODE_BRIGHTNESS (Standard: eingeschaltet).
+#define AUTO_JUMP_TO_TIME
+
+// Automatischer Rücksprung von STD_MODE_BLANK, wenn DCF-Synchronisation erfolgreich war (Standard: eingeschaltet).
+#define AUTO_JUMP_BLANK
+
+// Anzeige der vergangenen Stunden und Minuten seit der letzten erfolgreichen DCF-Synchronisation im Menü EXT_MODE_DCF_SYNC (Standard: eingeschaltet).
+#define DCF77_SHOW_TIME_SINCE_LAST_SYNC
+
+// Schaltet für jede Eckled und das Alarmsymbol (Glockensymbol) nur die dazu passende Kathode und
+// nicht immer alle ein. Dies verhindert das Glimmen bei richtiger Verdrahtung. (Standard: ausgeschaltet)
+//#define USE_INDIVIDUAL_CATHODES
+
+// FPS im Debug-Modus anzeigen (Standard: eingeschaltet).
+#define FPS_SHOW_DEBUG
 
 /*
  * Alarmfunktion einschalten?
@@ -66,11 +98,17 @@
 /*
  * Welche Fernbedienung soll benutzt werden?
  */
-#define REMOTE_NO_REMOTE
+   #define REMOTE_NO_REMOTE
 // #define REMOTE_SPARKFUN
 // #define REMOTE_MOONCANDLES
 // #define REMOTE_LUNARTEC
 
+
+/*
+ * Wie lange soll das definierte Symbol
+ * nach Ablauf des Countdowns blinken?
+ */
+#define COUNTDOWN_BLINK_DURATION 20
 /*
  *
  * Seltener zu aendernde Einstellungen...
@@ -141,16 +179,35 @@
  */
 #define MYDCF77_TELEGRAMMLAENGE 59
 /*
+ * Die Sekunde wird in die entsprechende Zahl
+ * von Signalbins unterteilt, um das Wegdriften
+ * der internen RTC quantifizieren zu können.
+ * Dieser Wert entspricht einer Auflösung.
+ * ACHTUNG! Wird diese Zahl zu groß gewählt (> 30), 
+ * überschreitet sie die Frequenz der loop().
+ * Eine Steigerung der Auflösung ist dann nicht mehr
+ * möglich, die Drift wird beliebig und es kann 
+ * keine Zeiteinstellung via DCF mehr erfolgen.
+ * Werte < 4 sind ebenso sinnlos.
+ * Default: 11  (sinnvoll: 5 - 25)
+ */
+#define MYDCF77_SIGNAL_BINS 11
+/*
+ * Dieser Wert gibt an wie viele Sekunden
+ * die Drift bestimmt, bevor sie korrigiert wird.
+ * ACHTUNG! Ein zu großer Wert verhindert eine
+ * wirksame Driftkorrektur. Bei einem zu kleinen
+ * Wert hingegen wird eine erfolgreiche
+ * Zeitsynchronisation praktisch unmöglich.
+ * Default: 30  (sinnvoll: 10 - 300)
+ */
+#define MYDCF77_DRIFT_CORRECTION_TIME 30
+/*
  * Ist das Signal invertiert (z.B. ELV-Empfaenger)?
  * Default: ausgeschaltet.
  * Jetzt im EEPROM! Hier hat es keine Bedeutung mehr!
  * #define MYDCF77_SIGNAL_IS_INVERTED
  */
-/*
- * Anzahl der Glaettungspunkte fuer das DCF77-Signal.
- * Default: bis v3.3.0 8, jetzt 59.
- */
-#define MYDCF77_MEANCOUNT 59
 
 /*
  * Startwerte fuer den Mittelwert.

@@ -4,9 +4,9 @@
  *
  * @mc       Arduino/RBBB
  * @autor    Christian Aschoff / caschoff _AT_ mac _DOT_ com
- * @version  1.7
+ * @version  1.7a
  * @created  18.2.2011
- * @updated  16.2.2015
+ * @updated  15.04.2016 (Ergänzungen von A. Mueller)
  *
  * Versionshistorie:
  * V 1.1:  - Kompatibilitaet zu Arduino-IDE 1.0 hergestellt.
@@ -16,6 +16,7 @@
  * V 1.5:  - Ueberlauf in millis() beruecksichtigt.
  * V 1.6:  - Schalten gegen LOW ermoeglicht.
  * V 1.7:  - Unterstuetzung fuer die alte Arduino-IDE (bis 1.0.6) entfernt.
+ * V 1.7a: - Berücksichtigung des Überlaufs in millis() wieder rückgängig gemacht.
  */
 #include "Button.h"
 
@@ -54,7 +55,6 @@ Button::Button(byte pin1, byte pin2, byte pressedAgainst) {
     _lastPressTime = 0;
     _doubleMode = true;
     _pressedAgainst = pressedAgainst;
-    _pressedAgainst = pressedAgainst;
     if (_pressedAgainst == HIGH) {
         pinMode(_pin1, INPUT);
         pinMode(_pin2, INPUT);
@@ -70,18 +70,13 @@ Button::Button(byte pin1, byte pin2, byte pressedAgainst) {
 boolean Button::pressed() {
     boolean _retVal = false;
 
-    if (millis() < _lastPressTime) {
-        // wir hatten einen Ueberlauf...
-        _lastPressTime = millis();
-    }
-
     if (!_doubleMode) {
-        if ((digitalRead(_pin1) == _pressedAgainst) && (_lastPressTime + BUTTON_TRESHOLD < millis())) {
+        if ((digitalRead(_pin1) == _pressedAgainst) && (millis() - _lastPressTime > BUTTON_TRESHOLD)) {
             _lastPressTime = millis();
             _retVal = true;
         }
     } else {
-        if ((digitalRead(_pin1) == _pressedAgainst) && (digitalRead(_pin2) == _pressedAgainst) && (_lastPressTime + BUTTON_TRESHOLD < millis())) {
+        if ((digitalRead(_pin1) == _pressedAgainst) && (digitalRead(_pin2) == _pressedAgainst) && (millis() - _lastPressTime > BUTTON_TRESHOLD)) {
             _lastPressTime = millis();
             _retVal = true;
         }

@@ -4,9 +4,9 @@
  *
  * @mc       Arduino/RBBB
  * @autor    Christian Aschoff / caschoff _AT_ mac _DOT_ com
- * @version  1.5
+ * @version  1.6b
  * @created  21.1.2013
- * @updated  16.2.2015
+ * @updated  10.04.2016  (Ergänzungen von A. Mueller)
  *
  * Versionshistorie:
  * V 1.0:  - Erstellt.
@@ -16,11 +16,17 @@
  *         - Fehler im Italienischen behoben.
  * V 1.4:  - Stundenbegrenzung (die ja wegen der Zeitverschiebungsmoeglichkeit existiert) auf den Bereich 0 <= h <= 24 ausgeweitet, dank Tipp aus dem Forum.
  * V 1.5:  - Unterstuetzung fuer die alte Arduino-IDE (bis 1.0.6) entfernt.
+ * V 1.6:  - Stundenbegrenzung (die ja wegen der Zeitverschiebungsmoeglichkeit existiert) auf den Bereich 0 <= h <= 24 auch in setHours eingefuehrt, siehe http://diskussion.christians-bastel-laden.de/viewtopic.php?f=17&t=2028
+ * V 1.6a: - Fehler bei Stundenbegrenzung in setMinutes korrigiert und Stundenbegrenzung aus setHours wieder entfernt, siehe http://diskussion.christians-bastel-laden.de/viewtopic.php?f=17&t=2028
+ *         - Kleinere Aufräumarbeiten
+ * V 1.6b: - Minimale Codeoptimierung
+ *         - Zusätzliche Option, für jede Eckled nur die dazugehörige Kathode und nicht alle einzuschalten. Dies Verhindert das Glimmen ausgeschalteter Eckleds. (Standard: ausgeschaltet)
  */
 #ifndef RENDERER_H
 #define RENDERER_H
 
 #include "Arduino.h"
+#include "Configuration.h"
 
 #define LANGUAGE_DE_DE 0
 #define LANGUAGE_DE_SW 1
@@ -40,6 +46,7 @@ public:
 
     void setMinutes(char hours, byte minutes, byte language, word matrix[16]);
     void setCorners(byte minutes, boolean cw, word matrix[16]);
+    void activateAlarmLed(word matrix[16]);
 
     void cleanWordsForAlarmSettingMode(byte language, word matrix[16]);
 
@@ -48,7 +55,7 @@ public:
     void setAllScreenBuffer(word matrix[16]);
 
 private:
-    void setHours(byte hours, boolean glatt, byte language, word matrix[16]);
+    void setHours(char hours, boolean glatt, byte language, word matrix[16]);
 
     // Spezialfaelle
     void FR_hours(byte hours, word matrix[16]);

@@ -31,7 +31,7 @@
 /**
  * Initialisierung mit der Adresse der DS1307
  */
-MyRTC::MyRTC(int address, byte statusLedPin) {
+MyRTC::MyRTC(int address, byte statusLedPin) : TimeStamp(0, 0, 0, 0, 0, 0) {
     _address = address;
     _statusLedPin = statusLedPin;
     pinMode(_statusLedPin, OUTPUT);
@@ -174,53 +174,6 @@ uint8_t MyRTC::conv2d(const char* p) {
     return 10 * v + *++p - '0';
 }
 
-/**
- * Geklaut von Jee-Labs.
- * A convenient constructor for using "the compiler's time":
- * DateTime now (__DATE__, __TIME__);
- * NOTE: using PSTR would further reduce the RAM footprint
- */
-void MyRTC::set(const char* date, const char* time) {
-    // sample input: date = "Dec 26 2009", time = "12:34:56"
-    _year = conv2d(date + 9);
-    // Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec
-    switch (date[0]) {
-        case 'J':
-            if (date[1] == 'a') {
-                _month = 1;
-            } else if (date[2] == 'n') {
-                _month = 6;
-            } else {
-                _month = 7;
-            }
-            break;
-        case 'F':
-            _month = 2;
-            break;
-        case 'A':
-            _month = date[2] == 'r' ? 4 : 8;
-            break;
-        case 'M':
-            _month = date[2] == 'r' ? 3 : 5;
-            break;
-        case 'S':
-            _month = 9;
-            break;
-        case 'O':
-            _month = 10;
-            break;
-        case 'N':
-            _month = 11;
-            break;
-        case 'D':
-            _month = 12;
-            break;
-    }
-    _date = conv2d(date + 4);
-    _hours = conv2d(time);
-    _minutes = conv2d(time + 3);
-    _seconds = conv2d(time + 6);
-}
 
 //
 // Setter/Getter
@@ -230,83 +183,6 @@ void MyRTC::setSeconds(byte seconds) {
     _seconds = seconds;
 }
 
-void MyRTC::setMinutes(byte minutes) {
-    _minutes = minutes;
-}
-
-void MyRTC::incMinutes() {
-    _minutes++;
-    if (_minutes > 59) {
-        _minutes = 0;
-    }
-}
-
-void MyRTC::setHours(byte hours) {
-    _hours = hours;
-}
-
-void MyRTC::incHours() {
-    _hours++;
-    if (_hours > 23) {
-        _hours = 0;
-    }
-}
-
-void MyRTC::setDayOfWeek(byte dayOfWeek) {
-    _dayOfWeek = dayOfWeek;
-}
-
-void MyRTC::setDate(byte date) {
-    _date = date;
-}
-
-void MyRTC::setMonth(byte month) {
-    _month = month;
-}
-
-void MyRTC::setYear(byte year) {
-    _year = year;
-}
-
 byte MyRTC::getSeconds() {
     return _seconds;
-}
-
-byte MyRTC::getMinutes() {
-    return _minutes;
-}
-
-unsigned int MyRTC::getMinutesOfDay() {
-    return _minutes + 60 * _hours;
-}
-
-// Minuten des Tages ohne die Beruecksichtigung von 12/24 Stunden
-// (fuer den Wecker)...
-
-unsigned int MyRTC::getMinutesOf12HoursDay() {
-    int h = _hours;
-    while (h > 12) {
-        h -= 12;
-    }
-    return _minutes + 60 * h;
-}
-
-byte MyRTC::getHours() {
-    return _hours;
-}
-
-byte MyRTC::getDayOfWeek() {
-    return _dayOfWeek;
-}
-
-byte MyRTC::getDate() {
-    return _date;
-}
-
-byte MyRTC::getMonth() {
-    return _month;
-}
-
-byte MyRTC::getYear() {
-    return _year;
 }

@@ -5,9 +5,9 @@
  *
  * @mc       Arduino/RBBB
  * @autor    Christian Aschoff / caschoff _AT_ mac _DOT_ com
- * @version  1.8
+ * @version  1.8a
  * @created  19.3.2011
- * @updated  16.2.2015
+ * @updated  29.03.2016 (ergänzt durch A. Mueller)
  *
  * Versionshistorie:
  * V 1.1:  - Fehler in der Initialisierung behoben.
@@ -18,10 +18,11 @@
  * V 1.6:  - Optimierung hinsichtlich Speicherbedarf.
  * V 1.7:  - Verbessertes Debugging.
  * V 1.8:  - Unterstuetzung fuer die alte Arduino-IDE (bis 1.0.6) entfernt.
+ * V 1.8a: - Datum wird jetzt ebenfalls geprüft (via getMinutesOfCentury())
  */
 #include "DCF77Helper.h"
 
-// #define DEBUG
+//#define DEBUG
 #include "Debug.h"
 
 /**
@@ -39,13 +40,13 @@ DCF77Helper::DCF77Helper() {
 /**
  * Einen neuen Sample hinzufuegen.
  */
-void DCF77Helper::addSample(MyDCF77 dcf77, MyRTC rtc) {
+void DCF77Helper::addSample(TimeStamp* dcf77, TimeStamp* rtc) {
     DEBUG_PRINT(F("Adding sample from dcf77: "));
-    _zeitstempelDcf77[_cursor]->setFrom(dcf77);
+    _zeitstempelDcf77[_cursor]->set(dcf77);
     DEBUG_PRINTLN(_zeitstempelDcf77[_cursor]->asString());
 
     DEBUG_PRINT(F("Adding sample from rtc: "));
-    _zeitstempelRtc[_cursor]->setFrom(rtc);
+    _zeitstempelRtc[_cursor]->set(rtc);
     DEBUG_PRINTLN(_zeitstempelRtc[_cursor]->asString());
     DEBUG_FLUSH();
 
@@ -61,14 +62,20 @@ void DCF77Helper::addSample(MyDCF77 dcf77, MyRTC rtc) {
 boolean DCF77Helper::samplesOk() {
     boolean ret = true;
     for (byte i = 0; i < DCF77HELPER_MAX_SAMPLES - 1; i++) {
-        // Teste den Minutenabstand zwischen den Zeitstempeln...
-        if ((_zeitstempelDcf77[i]->getMinutesOfDay() - _zeitstempelDcf77[i + 1]->getMinutesOfDay()) != (_zeitstempelRtc[i]->getMinutesOfDay() - _zeitstempelRtc[i + 1]->getMinutesOfDay())) {
+        #ifdef DEBUG
+            long minuteDiffDcf77 = _zeitstempelDcf77[i]->getMinutesOfCentury() - _zeitstempelDcf77[i + 1]->getMinutesOfCentury();
+            long minuteDiffRtc = _zeitstempelRtc[i]->getMinutesOfCentury() - _zeitstempelRtc[i + 1]->getMinutesOfCentury();
+        #endif
+        long diff = _zeitstempelDcf77[i]->getMinutesOfCentury() - _zeitstempelDcf77[i + 1]->getMinutesOfCentury()
+                 -( _zeitstempelRtc[i]->getMinutesOfCentury() - _zeitstempelRtc[i + 1]->getMinutesOfCentury() );
+        // Teste den Minutenabstand (über den gesamten Datumsbereich) zwischen den Zeitstempeln...
+        if ( abs(diff) > 1 ) {
             DEBUG_PRINT(F("Diff #"));
             DEBUG_PRINT(i);
             DEBUG_PRINT(F(" distance is wrong ("));
-            DEBUG_PRINT(_zeitstempelDcf77[i]->getMinutesOfDay() - _zeitstempelDcf77[i + 1]->getMinutesOfDay());
+            DEBUG_PRINT(minuteDiffDcf77);
             DEBUG_PRINT(F("!="));
-            DEBUG_PRINT(_zeitstempelRtc[i]->getMinutesOfDay() - _zeitstempelRtc[i + 1]->getMinutesOfDay());
+            DEBUG_PRINT(minuteDiffRtc);
             DEBUG_PRINTLN(F(")."));
             DEBUG_FLUSH();
             ret = false;
@@ -76,9 +83,9 @@ boolean DCF77Helper::samplesOk() {
             DEBUG_PRINT(F("Diff #"));
             DEBUG_PRINT(i);
             DEBUG_PRINT(F(" distance is ok ("));
-            DEBUG_PRINT(_zeitstempelDcf77[i]->getMinutesOfDay() - _zeitstempelDcf77[i + 1]->getMinutesOfDay());
-            DEBUG_PRINT(F("=="));
-            DEBUG_PRINT(_zeitstempelRtc[i]->getMinutesOfDay() - _zeitstempelRtc[i + 1]->getMinutesOfDay());
+            DEBUG_PRINT(minuteDiffDcf77);
+            DEBUG_PRINT(F("~="));
+            DEBUG_PRINT(minuteDiffRtc);
             DEBUG_PRINTLN(F(")."));
             DEBUG_FLUSH();
         }

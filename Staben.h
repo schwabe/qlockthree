@@ -3,7 +3,7 @@
  * Definition der (Buch-)Staben fuer die QLOCKTWO.
  * Die Staben sind wie die Woerter Bitmasken fuer die Matrix.
  * Die Staben sind so ausgelegt, dass zwei nebeneinander passen.
- * Das ist wichtig fuewr die Konfiguration der Uhr.
+ * Das ist wichtig fuer die Konfiguration der Uhr.
  *
  * @mc       Arduino/RBBB
  * @autor    Christian Aschoff / caschoff _AT_ mac _DOT_ com

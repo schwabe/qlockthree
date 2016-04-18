@@ -4,9 +4,9 @@
  *
  * @mc       Arduino/RBBB
  * @autor    Christian Aschoff / caschoff _AT_ mac _DOT_ com
- * @version  1.5
+ * @version  1.6b
  * @created  21.1.2013
- * @updated  16.2.2015
+ * @updated  10.04.2016  (Ergänzungen von A. Mueller)
  *
  * Versionshistorie:
  * V 1.0:  - Erstellt.
@@ -16,6 +16,11 @@
  *         - Fehler im Italienischen behoben.
  * V 1.4:  - Stundenbegrenzung (die ja wegen der Zeitverschiebungsmoeglichkeit existiert) auf den Bereich 0 <= h <= 24 ausgeweitet, dank Tipp aus dem Forum.
  * V 1.5:  - Unterstuetzung fuer die alte Arduino-IDE (bis 1.0.6) entfernt.
+ * V 1.6:  - Stundenbegrenzung (die ja wegen der Zeitverschiebungsmoeglichkeit existiert) auf den Bereich 0 <= h <= 24 auch in setHours eingefuehrt, siehe http://diskussion.christians-bastel-laden.de/viewtopic.php?f=17&t=2028
+ * V 1.6a: - Fehler bei Stundenbegrenzung in setMinutes korrigiert und Stundenbegrenzung aus setHours wieder entfernt, siehe http://diskussion.christians-bastel-laden.de/viewtopic.php?f=17&t=2028
+ *         - Kleinere Aufräumarbeiten
+ * V 1.6b: - Kleine Codeoptimierungen
+ *         - Zusätzliche Option, für jede Eckled nur die dazugehörige Kathode und nicht alle einzuschalten. Dies Verhindert das Glimmen ausgeschalteter Eckleds. (Standard: ausgeschaltet)
  */
 #include "Renderer.h"
 
@@ -67,11 +72,13 @@ void Renderer::setAllScreenBuffer(word matrix[16]) {
  */
 void Renderer::setMinutes(char hours, byte minutes, byte language, word matrix[16]) {
     while (hours < 0) {
-        hours += 12;
+        hours += 24;
     }
-    while (hours > 24) {
-        hours -= 12;
+    while (hours >= 24) {
+        hours -= 24;
     }
+
+    byte minutes_5 = minutes / 5;
 
     switch (language) {
             //
@@ -83,7 +90,7 @@ void Renderer::setMinutes(char hours, byte minutes, byte language, word matrix[1
         case LANGUAGE_DE_SA:
             DE_ESIST;
 
-            switch (minutes / 5) {
+            switch (minutes_5) {
                 case 0:
                     // glatte Stunde
                     setHours(hours, true, language, matrix);
@@ -187,7 +194,7 @@ void Renderer::setMinutes(char hours, byte minutes, byte language, word matrix[1
         case LANGUAGE_CH:
             CH_ESISCH;
 
-            switch (minutes / 5) {
+            switch (minutes_5) {
                 case 0:
                     // glatte Stunde
                     setHours(hours, true, language, matrix);
@@ -267,7 +274,7 @@ void Renderer::setMinutes(char hours, byte minutes, byte language, word matrix[1
         case LANGUAGE_EN:
             EN_ITIS;
 
-            switch (minutes / 5) {
+            switch (minutes_5) {
                 case 0:
                     // glatte Stunde
                     setHours(hours, true, language, matrix);
@@ -350,7 +357,7 @@ void Renderer::setMinutes(char hours, byte minutes, byte language, word matrix[1
         case LANGUAGE_FR:
             FR_ILEST;
 
-            switch (minutes / 5) {
+            switch (minutes_5) {
                 case 0:
                     // glatte Stunde
                     setHours(hours, true, language, matrix);
@@ -440,7 +447,7 @@ void Renderer::setMinutes(char hours, byte minutes, byte language, word matrix[1
             // Italienisch
             //
         case LANGUAGE_IT:
-            switch (minutes / 5) {
+            switch (minutes_5) {
                 case 0:
                     // glatte Stunde
                     setHours(hours, true, language, matrix);
@@ -535,7 +542,7 @@ void Renderer::setMinutes(char hours, byte minutes, byte language, word matrix[1
         case LANGUAGE_NL:
             NL_HETIS;
 
-            switch (minutes / 5) {
+            switch (minutes_5) {
                 case 0:
                     // glatte Stunde
                     setHours(hours, true, language, matrix);
@@ -615,7 +622,7 @@ void Renderer::setMinutes(char hours, byte minutes, byte language, word matrix[1
             // Spanisch
             //
         case LANGUAGE_ES:
-            switch (minutes / 5) {
+            switch (minutes_5) {
                 case 0:
                     // glatte Stunde
                     ES_hours(hours, matrix);
@@ -707,9 +714,11 @@ void Renderer::setMinutes(char hours, byte minutes, byte language, word matrix[1
  * Setzt die Stunden, je nach hours. 'glatt' bedeutet,
  * es ist genau diese Stunde und wir muessen 'UHR'
  * dazuschreiben und EIN statt EINS, falls es 1 ist.
- * (Zumindest im Deutschen)
+ * (Zumindest im Deutschen).
+ * Andere sprechliche Spezialfaelle kommen weiter unten
+ * im Code...
  */
-void Renderer::setHours(byte hours, boolean glatt, byte language, word matrix[16]) {
+void Renderer::setHours(char hours, boolean glatt, byte language, word matrix[16]) {
     switch (language) {
             //
             // Deutsch (Hochdeutsch, Schwaebisch, Bayrisch)
@@ -1133,55 +1142,33 @@ void Renderer::setHours(byte hours, boolean glatt, byte language, word matrix[16
  *             FALSE -> counter clock wise -> gegen den Uhrzeigersinn.
  */
 void Renderer::setCorners(byte minutes, boolean cw, word matrix[16]) {
-    if (cw) {
-        // im Uhrzeigersinn
-        switch (minutes % 5) {
-            case 0:
-                break;
-            case 1:
-                matrix[1] |= 0b0000000000011111; // 1
-                break;
-            case 2:
-                matrix[1] |= 0b0000000000011111; // 1
-                matrix[0] |= 0b0000000000011111; // 2
-                break;
-            case 3:
-                matrix[1] |= 0b0000000000011111; // 1
-                matrix[0] |= 0b0000000000011111; // 2
-                matrix[3] |= 0b0000000000011111; // 3
-                break;
-            case 4:
-                matrix[1] |= 0b0000000000011111; // 1
-                matrix[0] |= 0b0000000000011111; // 2
-                matrix[3] |= 0b0000000000011111; // 3
-                matrix[2] |= 0b0000000000011111; // 4
-                break;
+    byte b_minutes = minutes % 5;
+    for (byte i = 0; i < b_minutes; i++) {
+        byte j;
+        if (cw) {
+          // j: 1, 0, 3, 2
+          j = (1 - i + 4) % 4;
+        } else {
+          // j: 0, 1, 2, 3
+          j = i;
         }
-    } else {
-        // gegen den Uhrzeigersinn
-        switch (minutes % 5) {
-            case 0:
-                break;
-            case 1:
-                matrix[0] |= 0b0000000000011111; // 1
-                break;
-            case 2:
-                matrix[0] |= 0b0000000000011111; // 1
-                matrix[1] |= 0b0000000000011111; // 2
-                break;
-            case 3:
-                matrix[0] |= 0b0000000000011111; // 1
-                matrix[1] |= 0b0000000000011111; // 2
-                matrix[2] |= 0b0000000000011111; // 3
-                break;
-            case 4:
-                matrix[0] |= 0b0000000000011111; // 1
-                matrix[1] |= 0b0000000000011111; // 2
-                matrix[2] |= 0b0000000000011111; // 3
-                matrix[3] |= 0b0000000000011111; // 4
-                break;
-        }
+        #ifdef USE_INDIVIDUAL_CATHODES
+            matrix[j] |= (0b0000000000010000 >> j);
+        #else
+            matrix[j] |= 0b0000000000011111;
+        #endif
     }
+}
+
+/**
+ * Schalte die Alarm-LED ein
+ */
+void Renderer::activateAlarmLed(word matrix[16]) {
+    #ifdef USE_INDIVIDUAL_CATHODES
+        matrix[4] |= 0b0000000000000001;
+    #else
+        matrix[4] |= 0b0000000000011111;
+    #endif 
 }
 
 /**

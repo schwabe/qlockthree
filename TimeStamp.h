@@ -6,9 +6,9 @@
  *
  * @mc       Arduino/RBBB
  * @autor    Christian Aschoff / caschoff _AT_ mac _DOT_ com
- * @version  1.7
+ * @version  1.7b
  * @created  2.3.2011
- * @updated  16.2.2015
+ * @updated  17.04.2016 (ergänzt durch A. Mueller)
  *
  * Versionshistorie:
  * V 1.1:  - Fehler in toString() behoben.
@@ -18,40 +18,47 @@
  * V 1.5:  - Optimierung hinsichtlich Speicherbedarf.
  * V 1.6:  - Verbessertes Debugging & leeren Konstruktor entfernt.
  * V 1.7:  - Unterstuetzung fuer die alte Arduino-IDE (bis 1.0.6) entfernt.
+ * V 1.7a: - Funktion getMinutesOfCentury() hinzugefügt
+ * V 1.7b: - Function getMinutesOfWeek() hinzugefügt
  */
 #ifndef TIMESTAMP_H
 #define TIMESTAMP_H
 
 #include "Arduino.h"
-#include "MyDCF77.h"
-#include "MyRTC.h"
 
 class TimeStamp {
 public:
     TimeStamp(byte minutes, byte hours, byte date, byte dayOfWeek, byte month, byte year);
-    TimeStamp(MyDCF77 dcf77);
-    TimeStamp(MyRTC rtc);
 
     void incMinutes();
     void incHours();
 
     byte getMinutes();
-    unsigned int getMinutesOfDay();
     unsigned int getMinutesOf12HoursDay(int minutesDiff);
+    unsigned int getMinutesOfDay();
+    unsigned int getMinutesOfWeek_07();
+    unsigned int getMinutesOfWeek();
+    unsigned long getMinutesOfCentury();
     byte getHours();
 
     byte getDate();
     byte getDayOfWeek();
     byte getMonth();
-    byte getYear();
+    byte getYear();   
 
-    void setFrom(MyDCF77 dcf77);
-    void setFrom(MyRTC rtc);
+    void setMinutes(byte minutes);
+    void setHours(byte hours);
+    void setDayOfWeek(byte dayOfWeek);
+    void setDate(byte date);
+    void setMonth(byte month);
+    void setYear(byte year);
+
     void set(byte minutes, byte hours, byte date, byte dayOfWeek, byte month, byte year);
+    void set(TimeStamp* timeStamp);
 
     char* asString();
 
-private:
+protected:
     byte _minutes;
     byte _hours;
 

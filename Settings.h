@@ -5,9 +5,9 @@
  *
  * @mc       Arduino/RBBB
  * @autor    Christian Aschoff / caschoff _AT_ mac _DOT_ com
- * @version  1.3
+ * @version  1.3c
  * @created  23.1.2013
- * @updated  16.2.2015
+ * @updated  17.04.2016 (Ergänzungen von A. Mueller)
  *
  * Versionshistorie:
  * V 1.0:  - Erstellt.
@@ -17,11 +17,15 @@
  *         - DcfSignalIsInverted aufgenommen.
  *         - TimeShift aufgenommen.
  * V 1.3:  - Unterstuetzung fuer die alte Arduino-IDE (bis 1.0.6) entfernt.
+ * V 1.3a: - Einstellung für automatischen Rücksprung und Nachtschaltung aufgenommen.
+ * V 1.3b: - Einstellung der Nachtschaltung um Sonderzeiten am Wochenende erweitert.
+ * V 1.3c: - Codeoptimierung bei den Einstellungen zur Nachtschaltung
  */
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
 #include "Arduino.h"
+#include "TimeStamp.h"
 
 class Settings {
 public:
@@ -48,6 +52,11 @@ public:
     char getTimeShift();
     void setTimeShift(char timeShift);
 
+    byte getJumpToTime();
+    void setJumpToTime(byte jumpToTime);
+
+    TimeStamp* getNightTimeStamp(byte _position);
+
     void loadFromEEPROM();
     void saveToEEPROM();
 
@@ -59,6 +68,10 @@ private:
     boolean _enableAlarm;
     boolean _dcfSignalIsInverted;
     char _timeShift;
+    byte _jumpToTime;
+    TimeStamp* _NightTimes[4];
+
+    void _loadSaveNightTimes(boolean save);
 };
 
 #endif

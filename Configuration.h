@@ -156,6 +156,8 @@
  */
 #define BUTTON_TRESHOLD 300
 
+#define TOUCHBUTTONS
+
 // ------------------ DCF77-Empfaenger ---------------------
 /*
  * Fuer wieviele DCF77-Samples muessen die Zeitabstaende stimmen, damit das DCF77-Telegramm als gueltig zaehlt?

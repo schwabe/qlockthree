@@ -236,6 +236,9 @@
 #include "MyDCF77.h"
 #include "Button.h"
 #include "AnalogButton.h"
+#include "DoubleButton.h"
+#include "TouchButton.h"
+#include "DigitalButton.h"
 #include "LDR.h"
 #include "DCF77Helper.h"
 #include "Renderer.h"
@@ -449,9 +452,16 @@ LedDriverDotStar ledDriver(6, 7);
  * zu können */
 //LedDriverLPD8806 ledDriver(-1, 14);
 LedDriverLPD8806 ledDriver(6, 7);
+
+#ifdef TOUCHBUTTONS
+#define PIN_MODE A3
+#define PIN_M_PLUS A2
+#define PIN_H_PLUS A4
+#else
 #define PIN_MODE 23
 #define PIN_M_PLUS 22
 #define PIN_H_PLUS 21
+#endif
 #else
 #define PIN_MODE 11
 #define PIN_M_PLUS 13
@@ -464,7 +474,7 @@ LedDriverLPD8806 ledDriver(6, 7);
 
 #define PIN_IR_RECEIVER A1
 
-#define PIN_LDR A5
+#define PIN_LDR A0
 #define IS_INVERTED false
 
 #define PIN_SQW_SIGNAL 2
@@ -473,7 +483,7 @@ LedDriverLPD8806 ledDriver(6, 7);
 #define PIN_DCF77_PON 4
 
 #define PIN_SQW_LED -1
-#define PIN_DCF77_LED 10
+#define PIN_DCF77_LED 13
 
 #define PIN_SPEAKER -1
 #endif
@@ -532,10 +542,16 @@ byte brightnessToDisplay;
 /**
  * Die Tasten.
  */
+#ifdef TOUCHBUTTONS
+TouchButton minutesPlusButton(PIN_M_PLUS);
+TouchButton hoursPlusButton(PIN_H_PLUS);
+TouchButton modeChangeButton(PIN_MODE);
+#else
 Button minutesPlusButton(PIN_M_PLUS, BUTTONS_PRESSING_AGAINST);
 Button hoursPlusButton(PIN_H_PLUS, BUTTONS_PRESSING_AGAINST);
-Button extModeDoubleButton(PIN_M_PLUS, PIN_H_PLUS, BUTTONS_PRESSING_AGAINST);
 Button modeChangeButton(PIN_MODE, BUTTONS_PRESSING_AGAINST);
+#endif
+DoubleButton extModeDoubleButton(minutesPlusButton, hoursPlusButton);
 
 /**
  * Die Standard-Modi.
@@ -582,6 +598,8 @@ Button modeChangeButton(PIN_MODE, BUTTONS_PRESSING_AGAINST);
 
 // Startmode...
 byte mode = STD_MODE_NORMAL;
+//byte mode = EXT_MODE_TEST;
+
 // Merker fuer den Modus vor der Abschaltung...
 byte lastMode = mode;
 
@@ -590,6 +608,11 @@ byte lastMode = mode;
 // Arduino analog input 5 = I2C SCL
 
 // Die Matrix, eine Art Bildschirmspeicher
+// Die Matrix ist zeilenweise,
+// Eck Leds (Bits 0-4):
+// matrix[i] & 0b0000000000011111 => ecken (i=1,0,3,2)
+// Bits 5-15 sind die Punkte
+// matrix[10]
 word matrix[16];
 
 // Hilfsvariable, da I2C und Interrupts nicht zusammenspielen
@@ -1314,6 +1337,10 @@ void loop() {
     if (modeChangeButton.pressed()) {
         modePressed();
     }
+
+//    Serial.printf("Touch read: %d %d %d %d %d\r\n", 0,  touchRead(A5),
+//   touchRead(A4),touchRead(A3), touchRead(A1));
+
 
     /*
      *

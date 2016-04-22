@@ -147,10 +147,10 @@ void LedDriverLPD8806::_setEcke(uint8_t ecke, uint32_t c) {
 void LedDriverLPD8806::_setPixel(byte x, byte y, uint32_t c) {
     if (y % 2==1) {
         // Gegenläufige Reiche
-        x = 10 -x;
+        x = 11 -x;
     } else {
         // Ganz links freilassen
-        x = x +1;
+        x = x;
     }
     if (y == 0) {
         _strip->setPixelColor(2+x, c);

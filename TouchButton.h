@@ -23,9 +23,6 @@
 #include "Arduino.h"
 #include "Button.h"
 
-#define TOUCHSAMPLES 100
-#define TOUCHTHRESHOLD 40
-
 class TouchButton : public Button {
 public:
     /**
@@ -33,13 +30,14 @@ public:
      *
      * @param  pin: der Pin, an dem die Touchfläche hängt
      */
-    TouchButton(byte pin): pin(pin), samples(0), idleAvg(0) {}
+    TouchButton(byte pin): pin(pin), samples(0), idleAvg(0), samplesTouched(0) {}
 
     virtual bool getState();
 
 private:
     uint8_t pin;
     int samples;
+    int samplesTouched;
     double idleAvg;
 };
 

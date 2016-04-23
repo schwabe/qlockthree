@@ -156,7 +156,18 @@
  */
 #define BUTTON_TRESHOLD 300
 
+//! Die Buttons sind Touchtasten (Teensy 3.2)
 #define TOUCHBUTTONS
+
+//! Wie viele samples gesammelt werden, bis der Durchschnitt als stabil erachtet wird
+#define TOUCHSAMPLES 1500
+
+//! Minimal Erhöhung des Wertes, um mal als berüht zu gelten
+#define TOUCHTHRESHOLD 60
+
+//! Nummer der Samples die über dem Durchschnitt liegen müssen, vermeidet spontanes Rauschen
+#define NUMTOCUHSAMPLES 5
+
 
 // ------------------ DCF77-Empfaenger ---------------------
 /*

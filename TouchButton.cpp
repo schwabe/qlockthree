@@ -20,6 +20,10 @@ boolean TouchButton::getState() {
     if (t > idleAvg + TOUCHTHRESHOLD)
         Serial.printf("%d: t %d, tavg %.1f, %d\r\n", pin, t, idleAvg,(int) (t- idleAvg));
 
-    return (t > idleAvg + TOUCHTHRESHOLD);
+    if (t > idleAvg + TOUCHTHRESHOLD)
+        samplesTouched++;
+    else
+        samplesTouched=0;
 
+    return (samplesTouched > NUMTOUCHSAMPLES);
 }

@@ -30,6 +30,7 @@
 #define NUM_PIXEL 130
 #endif
 
+
 /**
    Initialisierung.
 
@@ -55,6 +56,27 @@ LedDriverLPD8806::LedDriverLPD8806(byte dataPin, byte clockPin) {
   _demoTransition = false;
   _lastLEDsOn = 0;
 }
+
+uint32_t LedDriverLPD8806::fixColor(uint32_t c)
+{
+        int r = (c >> 8) & 0x7f;
+    int b = (c >> 16) & 0x7f;
+    int g = c  & 0x7ff;
+
+    r = r;
+
+    g = g * (127.0/75);
+    b = b * (127.0/24);
+
+    /*    r = 0x7f; 
+    b = 28;
+    g = 75; */
+
+    
+
+    return _strip->Color(r, g, b);
+}
+
 
 /**
    init() wird im Hauptprogramm in init() aufgerufen.
@@ -363,6 +385,7 @@ void LedDriverLPD8806::_setEcke(uint8_t ecke, uint32_t c) {
  * Einen X/Y-koordinierten Pixel in der Matrix setzen.
  */
 void LedDriverLPD8806::_setPixel(byte x, byte y, uint32_t c) {
+    c = fixColor(c);
     y = 9-y;
     if (y % 2==1) {
         // Gegenläufige Reiche
@@ -391,10 +414,18 @@ void LedDriverLPD8806::_setPixel(byte x, byte y, uint32_t c) {
 }
 #endif
 
+
+
 /**
    Einen Pixel im Streifen setzten (die Eck-LEDs sind am Ende).
 */
 void LedDriverLPD8806::_setPixel(byte num, uint32_t c) {
+    c = fixColor(c);
+    //#if CRAZY_COLORS
+        //
+
+    // Farben ändern
+        
 #if defined(MATRIX_XXL) || defined(RGBW_LEDS)
   if (num < 110) {
     if ((num / 11) % 2 == 0) {

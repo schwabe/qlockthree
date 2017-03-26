@@ -30,7 +30,7 @@ boolean TouchButton::getState() {
     int t = touchRead(pin);
     samples++;
 
-    const float alpha=0.1;
+    const float alpha=0.01;
 
     // Moving exponential average
     idleAvg = (alpha * t) + (1.0 - alpha) * idleAvg;
@@ -40,9 +40,9 @@ boolean TouchButton::getState() {
     else
         samplesTouched=0;
 
-    if (t > idleAvg + TOUCHTHRESHOLD)
-        Serial.printf("%d: t %d, tavg %.1f, %d -> %d\r\n", pin, t, idleAvg,(int) (t- idleAvg), samplesTouched);
-    
+    if (t > idleAvg + TOUCHTHRESHOLD && samples > TOUCHSAMPLES){
+        //   Serial.printf("%d: t %d, tavg %.1f, %d -> %d\r\n", pin, t, idleAvg,(int) (t- idleAvg), samplesTouched);
+    }
     state = (samplesTouched > NUMTOUCHSAMPLES);
     return state;
 

@@ -74,6 +74,8 @@ class LedDriverLPD8806 : public LedDriver {
 
     unsigned int _lastLEDsOn;
 
+    uint32_t fixColor(uint32_t c);
+
 #ifdef MATRIX_XXL
     LPD8806DBL *_strip;
 #else

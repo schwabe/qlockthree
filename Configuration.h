@@ -34,17 +34,17 @@
 // Einstellmöglichkeit Zeitverschiebung zum DCF Signal
 #define USE_EXT_MODE_TIME_SHIFT
 // LED Test spaltenweise
-//#define USE_EXT_MODE_TEST
+#define USE_EXT_MODE_TEST
 // DCF Debuganzeige
 #define USE_EXT_MODE_DCF_DEBUG
 
 // Im Menu auswählbare Sprachen aktivieren.
 #define ENABLE_LANGUAGE_DE
-#define ENABLE_LANGUAGE_CH
+//#define ENABLE_LANGUAGE_CH
 #define ENABLE_LANGUAGE_EN
 //#define ENABLE_LANGUAGE_FR
 //#define ENABLE_LANGUAGE_IT
-//#define ENABLE_LANGUAGE_NL
+#define ENABLE_LANGUAGE_NL
 //#define ENABLE_LANGUAGE_ES
 
 /*
@@ -92,7 +92,8 @@
 /*
  * Welches Board wird benutzt? Wird aktuell nur für das Pinmapping von LPD8806 und Neopixel gebraucht
  */
-#define BOARD_DEFAULT
+//#define BOARD_DEFAULT
+#define BOARD_TEENSY
 //#define BOARD_CLT
 //#define BOARD_BBRTCAD
 //#define BOARD_AMBBRTCAD
@@ -100,18 +101,18 @@
 /*
  * Welcher LED-Treiber soll benutzt werden?
  */
-#define LED_DRIVER_DEFAULT
+//#define LED_DRIVER_DEFAULT
 // #define LED_DRIVER_UEBERPIXEL
 // #define LED_DRIVER_POWER_SHIFT_REGISTER
 // #define LED_DRIVER_NEOPIXEL
 // #define LED_DRIVER_DOTSTAR
-// #define LED_DRIVER_LPD8806
+#define LED_DRIVER_LPD8806
 
 #if defined(LED_DRIVER_LPD8806) || defined(LED_DRIVER_NEOPIXEL)
 #define RGB_LEDS
 //#define RGBW_LEDS
 //#define MATRIX_XXL
-#define LPD_ALTLAYOUT
+#define LDP_ALT_LAYOUT
 #endif
 
 /*
@@ -124,10 +125,10 @@
 /*
  * Welche IR-Fernbedienung soll benutzt werden?
  */
-#define REMOTE_NO_REMOTE
+//#define REMOTE_NO_REMOTE
 //#define REMOTE_SPARKFUN
 //#define REMOTE_MOONCANDLES
-//#define REMOTE_LUNARTEC
+#define REMOTE_LUNARTEC
 //#define REMOTE_CLT
 
 // kann separat oder zusätzlich zu einer IR-Fernbedienung genutzt werden
@@ -187,10 +188,12 @@
 #define TOUCHSAMPLES 1500
 
 //! Minimal Erhöhung des Wertes, um mal als berüht zu gelten
-#define TOUCHTHRESHOLD 30
+#define TOUCHTHRESHOLD 40
 
 //! Nummer der Samples die über dem Durchschnitt liegen müssen, vermeidet spontanes Rauschen
-#define NUMTOUCHSAMPLES 3
+#define NUMTOUCHSAMPLES 4
+
+
 
 // ------------------ DCF77-Empfaenger ---------------------
 /*

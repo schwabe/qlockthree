@@ -502,8 +502,8 @@ LedDriverLPD8806 ledDriver(13, 11);
 #elif defined(BOARD_TEENSY)
 LedDriverLPD8806 ledDriver(7, 14);
 #define PIN_MODE 16
-#define PIN_M_PLUS 15
-#define PIN_H_PLUS 17
+#define PIN_M_PLUS 17
+#define PIN_H_PLUS 15
 
 #define BUTTONS_PRESSING_AGAINST LOW
 
@@ -877,8 +877,8 @@ void loop() {
     lastFpsCheck = millis();
   }
   if (lastFpsCheck + 1000 < millis()) {
-    DEBUG_PRINT("FPS: ");
-    DEBUG_PRINTLN(frames);
+      //    DEBUG_PRINT("FPS: ");
+      //    DEBUG_PRINTLN(frames);
     lastFpsCheck = millis();
     frames = 0;
   }

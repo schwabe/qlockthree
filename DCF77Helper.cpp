@@ -63,8 +63,8 @@ boolean DCF77Helper::samplesOk() {
     boolean ret = true;
     for (byte i = 0; i < DCF77HELPER_MAX_SAMPLES - 1; i++) {
         #ifdef DEBUG
-            long minuteDiffDcf77 = _zeitstempelDcf77[i]->getMinutesOfCentury() - _zeitstempelDcf77[i + 1]->getMinutesOfCentury();
-            long minuteDiffRtc = _zeitstempelRtc[i]->getMinutesOfCentury() - _zeitstempelRtc[i + 1]->getMinutesOfCentury();
+                    long minuteDiffDcf77 = _zeitstempelDcf77[i]->getMinutesOfCentury() - _zeitstempelDcf77[i + 1]->getMinutesOfCentury();
+                    long minuteDiffRtc = _zeitstempelRtc[i]->getMinutesOfCentury() - _zeitstempelRtc[i + 1]->getMinutesOfCentury();
         #endif
         long diff = _zeitstempelDcf77[i]->getMinutesOfCentury() - _zeitstempelDcf77[i + 1]->getMinutesOfCentury()
                  -( _zeitstempelRtc[i]->getMinutesOfCentury() - _zeitstempelRtc[i + 1]->getMinutesOfCentury() );

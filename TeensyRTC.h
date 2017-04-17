@@ -16,6 +16,9 @@
 #include "MyRTC.h"
 #include "TimeLib.h"
 
+#define DEBUG
+#include "Debug.h"
+
 inline time_t getTeensy3Time()
 {
     return Teensy3Clock.get();
@@ -38,7 +41,21 @@ public:
         _year = year(t) % 100;
         _dayOfWeek = weekday(t);
     };
-    void writeTime() { setTime(_hours, _minutes, _seconds, _date, _month, 2000 + _year);}
+
+    void writeTime() {
+
+        tmElements_t tm;
+        tm.Year =  30 + _year; // years after 1970
+        tm.Month = _month;
+        tm.Day = _date;
+        tm.Hour = _hours;
+        tm.Minute = _minutes;
+        tm.Second = _seconds;
+        time_t t = makeTime(tm);
+        Serial.printf("Teensy setting RTC, %d, %d-%d-%d %d:%d:%d", t, _year, _month, _date, _hours, _minutes, _seconds);
+        Teensy3Clock.set(t);
+        setTime(t);
+    }
 };
 
 #endif

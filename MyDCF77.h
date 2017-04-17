@@ -11,7 +11,7 @@
  *
  * @mc       Arduino/RBBB
  * @autor    Andreas Mueller
- *           Vorlage von: Christian Aschoff / caschoff _AT_ mac _DOT_ com
+> *           Vorlage von: Christian Aschoff / caschoff _AT_ mac _DOT_ com
  * @version  1.2
  * @created  21.3.2016
  * @updated  13.04.2016

@@ -31,11 +31,12 @@
  */
 #include "MyDCF77.h"
 
+
 //#define DEBUG
 #include "Debug.h"
 
 // Anzeige des Signalgraphen, nur wenn auch DEBUG gesetzt
-#define DEBUG_SIGNAL
+//#define DEBUG_SIGNAL
 // Höhe des Signalgraphen, wenn DEBUG_SIGNAL gesetzt (Default: 40.)
 #define DEBUG_SIGNAL_VIS_HEIGHT 40.
 

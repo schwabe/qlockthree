@@ -59,22 +59,17 @@ LedDriverLPD8806::LedDriverLPD8806(byte dataPin, byte clockPin) {
 
 uint32_t LedDriverLPD8806::fixColor(uint32_t c)
 {
-        int r = (c >> 8) & 0x7f;
+    int r = (c >> 8) & 0x7f;
     int b = (c >> 16) & 0x7f;
-    int g = c  & 0x7ff;
+    int g = c  & 0x7f;
 
     r = r;
 
-    g = g * (127.0/75);
-    b = b * (127.0/24);
+    b = b * (40/127.0);
+    g = g * (127/127.0);
 
-    /*    r = 0x7f; 
-    b = 28;
-    g = 75; */
-
-    
-
-    return _strip->Color(r, g, b);
+    return _strip->Color(r, b, g);
+    // richtig wäre: return _strip->Color(r, g, b);
 }
 
 
@@ -363,18 +358,18 @@ void LedDriverLPD8806::clearData() {
 #if defined(LDP_ALT_LAYOUT)
 void LedDriverLPD8806::_setEcke(uint8_t ecke, uint32_t c) {
     switch(ecke) {
-    case 0:
+    case 3:
         _strip->setPixelColor(1, c);
         break;
-    case 1:
+    case 2:
         // led unten links + zeile + 1. led
         _strip->setPixelColor(2 + 12  + 1 , c);
         break;
-    case 2:
+    case 1:
         // 2 * leds + 9 zeilen + 1. led
         _strip->setPixelColor(2*2 + 9 *12 + 1, c);
         break;
-    case 3:
+    case 0:
         // 10 zeilen + 3 * leds
         _strip->setPixelColor(10 *12 + (3 * 2) + 1, c);
         break;

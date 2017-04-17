@@ -687,6 +687,7 @@ void setup() {
   DEBUG_PRINTLN(F("... and starting in debug-mode..."));
   DEBUG_FLUSH();
 
+  
   // DCF konfigurieren
   pinMode(PIN_DCF77_PON, OUTPUT);
   enableDcf(false);
